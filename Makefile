@@ -7,30 +7,33 @@ AR = ar
 CFLAGS = -Wall -O -g
 DFLAGS = -Lavutil -Lavformat -Lavcodec -lm -lpthread -lz -lrt `sdl-config --cflags --libs`
 
-all:myPlayer
+all:myplay
 
-LIB_AVFORMAT = lib/libavformat.a
-LIB_AVCODEC = lib/libavcodec.a
-LIB_AVUTIL = lib/libavutil.a
-LIB_SWRE = lib/libswresample.a
-LIB_SWSCALE = lib/libswscale.a
+LIB_AVFORMAT = 	../libavformat/libavformat.a
+LIB_AVCODEC  = 	../libavcodec/libavcodec.a
+LIB_AVUTIL   = 	../libavutil/libavutil.a
+LIB_SWRE     = 	../libswresample/libswresample.a
+LIB_SWSCALE  = 	../libswscale/libswscale.a
 
-INCLUDES = include/
-INCLUDES += include/libavformat
-INCLUDES += include/libavcodec
-INCLUDES += include/libutil
-INCLUDES += include/libswresample
-INCLUDES += include/libswscale
+INCLUDES = 	../include/
+INCLUDES += ../include/libavformat
+INCLUDES += ../include/libavcodec
+INCLUDES += ../include/libutil
+INCLUDES += ../include/libswresample
+INCLUDES += ../include/libswscale
 
 
 CFLAGS += $(addprefix -I ,$(INCLUDES))
 
 LIBS = $(LIB_AVFORMAT) $(LIB_AVCODEC) $(LIB_AVUTIL) $(LIB_SWRE) $(LIB_SWSCALE)
 
-myPlayer:myPlayer.c $(LIBS)
+myplay:myplay.c $(LIBS)
 	$(CC) $(CFLAGS) $^ -o $@ $(DFLAGS)
+
+prebuild:
+	bash prebuild.sh
 
 .PHONY : clean
 clean:
-	-rm -f myPlayer
+	-rm -f myplay
 
