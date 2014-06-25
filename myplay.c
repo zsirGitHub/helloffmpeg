@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * AVPacket: demux后但未解码的数据. 由av_read_frame()读取.
+ * AVFrame:  decode后的帧数据. 需要先有av_frame_alloc()分配.
+*******************************************************************************/
+
+
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
@@ -101,6 +107,7 @@ int audio_decode_frame(AVCodecContext *aCodecCtx, uint8_t *audio_buf, int buf_si
 	static uint8_t *audio_pkt_data = NULL;
 	static int audio_pkt_size = 0;
 	AVFrame *pFrame = av_frame_alloc();
+    int got_frame;
 	
 	int len1, data_size;
 
@@ -108,11 +115,9 @@ int audio_decode_frame(AVCodecContext *aCodecCtx, uint8_t *audio_buf, int buf_si
 		while(audio_pkt_size > 0) {
 			data_size = buf_size;
 			#if 0
-			len1 = avcodec_decode_audio4(aCodecCtx, pFrame, &data_size, 
-						&pkt);
+			len1 = avcodec_decode_audio4(aCodecCtx, pFrame, &got_frame, &pkt);
 			#else
-			len1 = avcodec_decode_audio3(aCodecCtx, (int16_t *)audio_buf, &data_size, 
-						&pkt);
+			len1 = avcodec_decode_audio3(aCodecCtx, (int16_t *)audio_buf, &data_size, &pkt);
 			#endif
 			if(len1 < 0) {
 				/* if error, skip frame */
@@ -147,20 +152,23 @@ int audio_decode_frame(AVCodecContext *aCodecCtx, uint8_t *audio_buf, int buf_si
 	}
 }
 
+// SDL audio callback: to get decoded audio frame data.
+// stream: [out] decoded audio frame data.
+// len   : [in ] data length that SDL needs.
 void audio_callback(void *userdata, Uint8 *stream, int len) 
 {
 	AVCodecContext *aCodecCtx = (AVCodecContext *)userdata;
-	int len1, audio_size;
+	int len1, audio_size;  // Decoded audio data size
 
 	static uint8_t audio_buf[(MAX_AUDIO_FRAME_SIZE * 3) / 2];
 	static unsigned int audio_buf_size = 0;
 	static unsigned int audio_buf_index = 0;
 
 	printf("\r\n ==============>audio_callback  start\r\n");
-	while(len > 0) {
-		if(audio_buf_index >= audio_buf_size) {
+	while(len > 0) {                                                // 仍未满足SDL需求数据量, 需继续向解码器要数据.
+		if(audio_buf_index >= audio_buf_size) {                     // 上一次解码出来的数据已经推完, 需继续解码.
 			/* We have already sent all our data; get more */
-			audio_size = audio_decode_frame(aCodecCtx, audio_buf, sizeof(audio_buf));
+			audio_size = audio_decode_frame(aCodecCtx, audio_buf, sizeof(audio_buf));  // 解码音频帧后的数据放入audio_buf
 			printf("\r\n audio_size:%d!\r\n", audio_size);
 			if(audio_size < 0) {
 				/* If error, output silence */
@@ -172,8 +180,8 @@ void audio_callback(void *userdata, Uint8 *stream, int len)
 			audio_buf_index = 0;
 		}
 		len1 = audio_buf_size - audio_buf_index;
-		printf("\r\n len1:%d!\r\n", len1);
-		printf("\r\n len:%d!\r\n", len);
+//		printf("\r\n len1:%d!\r\n", len1);
+//		printf("\r\n len:%d!\r\n", len);
 		if(len1 > len)
 			len1 = len;
 		memcpy(stream, (uint8_t *)audio_buf + audio_buf_index, len1);
@@ -364,7 +372,7 @@ int main(int argc, char *argv[])
 			}
 		} 
 		else if(packet.stream_index==audioStream) {
-			printf("\r\n audioStream!\r\n");
+//			printf("\r\n audioStream!\r\n");
 			packet_queue_put(&audioq, &packet);
 		} else {
 			av_free_packet(&packet);

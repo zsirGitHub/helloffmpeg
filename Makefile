@@ -7,7 +7,7 @@ AR = ar
 CFLAGS = -Wall -O -g
 DFLAGS = -Lavutil -Lavformat -Lavcodec -lm -lpthread -lz -lrt -lbz2 `sdl-config --cflags --libs`
 
-all:myplay
+all:myplay mikeplay
 
 LIB_AVFORMAT = 	../libavformat/libavformat.a
 LIB_AVCODEC  = 	../libavcodec/libavcodec.a
@@ -28,6 +28,9 @@ CFLAGS += $(addprefix -I ,$(INCLUDES))
 LIBS = $(LIB_AVFORMAT) $(LIB_AVCODEC) $(LIB_AVUTIL) $(LIB_SWRE) $(LIB_SWSCALE)
 
 myplay:myplay.c $(LIBS)
+	$(CC) $(CFLAGS) $^ -o $@ $(DFLAGS)
+
+mikeplay:mikeplay.c $(LIBS)
 	$(CC) $(CFLAGS) $^ -o $@ $(DFLAGS)
 
 prebuild:
