@@ -5,7 +5,7 @@
 CC = gcc
 AR = ar
 CFLAGS = -Wall -O -g
-DFLAGS = -Lavutil -Lavformat -Lavcodec -lm -lpthread -lz -lrt `sdl-config --cflags --libs`
+DFLAGS = -Lavutil -Lavformat -Lavcodec -lm -lpthread -lz -lrt -lbz2 `sdl-config --cflags --libs`
 
 all:myplay
 
