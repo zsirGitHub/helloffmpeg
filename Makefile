@@ -15,12 +15,12 @@ LIB_AVUTIL   = 	../libavutil/libavutil.a
 LIB_SWRE     = 	../libswresample/libswresample.a
 LIB_SWSCALE  = 	../libswscale/libswscale.a
 
-INCLUDES = 	../include/
-INCLUDES += ../include/libavformat
-INCLUDES += ../include/libavcodec
-INCLUDES += ../include/libutil
-INCLUDES += ../include/libswresample
-INCLUDES += ../include/libswscale
+INCLUDES = 	../
+INCLUDES += ../libavformat
+INCLUDES += ../libavcodec
+INCLUDES += ../libutil
+INCLUDES += ../libswresample
+INCLUDES += ../libswscale
 
 
 CFLAGS += $(addprefix -I ,$(INCLUDES))
